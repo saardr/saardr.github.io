@@ -1,3 +1,15 @@
+---
+title: CryptoPals Set 1 writeup - Cracking repeating key XOR
+date: 2021-09
+categories:
+    - crypto
+    - programming
+tags:
+    - CryptoPals Set 1 writeup
+    - Cracking repeating key XOR
+---
+
+
 # CryptoPals challenges 1-6 writeups -  vinegre cipher
 
 #### the following are my solutions + explanations to the first set of the cryptopals challenges, other set solutions can be found at my [github](https://github.com/lordofswords)
