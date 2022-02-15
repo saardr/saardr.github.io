@@ -7,12 +7,11 @@ categories:
 tags:
     - CryptoPals Set 1 writeup
     - Cracking repeating key XOR
+    - CryptoPals writeups
 ---
 
 
-# CryptoPals challenges 1-6 writeups -  vinegre cipher
-
-#### the following are my solutions + explanations to the first set of the cryptopals challenges, other set solutions can be found at my [github](https://github.com/lordofswords)
+#### the following are my solutions + explanations to the first set of the cryptopals challenges. In my opinion, the main goal of challenges 1-5 is to prepare the solver for challenge 6 - cracking repeating key XOR.
 
 ## challenge 1: Convert hex to base64
 
