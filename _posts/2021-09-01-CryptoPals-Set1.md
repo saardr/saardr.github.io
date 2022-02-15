@@ -307,11 +307,11 @@ This was an intresting challenge. our <strong> plan of attack is </strong>
 1. first we guess the keysize:
     1. we write a [`hamming_distance`](https://en.wikipedia.org/wiki/Hamming_distance) function - the hamming distance is the number of differing bits <strong>(NOTE: not letters, but bits)</strong> between two string, this can be easily achieved by $\oplus$ing the two strings, and counting how many bits are on. 
     2. for every keysize in range(min_keysize, max_keysize):
-         1. split the ciphertext into blocks of size keysize each. then go through the text summing the hamming distance of every 2 adjacent blocks (so block1 with 2, block 3 with 4 etc...).<br> while summing, normalize diving by keysize. this is because as the length of the block increases, so does inevitably its hamming distance<br>
+         1. split the ciphertext into blocks of size keysize each. then go through the text summing the hamming distance of every 2 adjacent blocks (so block1 with 2, block 3 with 4 etc...). while summing, normalize diving by keysize. this is because as the length of the block increases, so does inevitably its hamming distance  
          2. normalize the entire sum, by the block count. this is because of we take for instance the string: 
-         <i>"12345678"</i>. one way we may calcaulte its keysize is by doing for keysize=2: <br>
-         <font size = 4.5> $\frac{`12`\oplus`34`}{2} + \frac{`56`\oplus`78`}{2} = \frac{`1234`\oplus`5678`}{2}$ </font> <br> while another can be for keysize=4:
-         <font size = 4.5> $\frac{`1234`\oplus`5678`}{4}$ </font>, which is why we need to normalize by the block count. (which will result in both keysize 2 & 4 being divided equally by 8) <br>
+         "12345678". one way we may calcaulte its keysize is by doing for keysize=2:  
+         $$\frac{`12`\oplus`34`}{2} + \frac{`56`\oplus`78`}{2} = \frac{`1234`\oplus`5678`}{2}$$ while another can be for keysize=4:
+         $$\frac{`1234`\oplus`5678`}{4}$$ , which is why we need to normalize by the block count. (which will result in both keysize 2 & 4 being divided equally by 8) 
          <strong> the normalized sum is the score. the lower it is - the better. </strong>
          3. pick the `guess_cnt` smallest-scored keysizes. those are our candidates.
 
@@ -355,9 +355,14 @@ def get_keysize_score(ciphertext_bytes, keysize, count = 2):
 
 consider two random bytes. the [expected value](https://en.wikipedia.org/wiki/Expected_value) of their hamming distance is:
 
-<font size = 4.5> $\mathbb{E}[HammingDist(b1,b2)] = \sum_{X=0}^{8}\mathbb{P}(HammingDist(b1,b2)=X)\cdot X = \sum_{i=0}^{8} \frac{256\cdot \binom{8}{i}}{256^2}\cdot i = \sum_{i=0}^{8}\frac{\binom{8}{i}}{256}\cdot i = 4 $ </font>
+$$
+\mathbb{E}[HammingDist(b1,b2)] = \sum_{X=0}^{8}\mathbb{P}(HammingDist(b1,b2)=X)\cdot X =  
+\sum_{i=0}^{8} \frac{256\cdot \binom{8}{i}}{256^2}\cdot i = \sum_{i=0}^{8}\frac{\binom{8}{i}}{256}\cdot i = 4 
+$$
 
-we use a unified probablity space $\Omega$ where $P(\omega) = \frac{1}{|\Omega|}$. multiplying by $256$ is because of all the possible values for the first byte, and the $\binom{8}{i}$ is how many options there are for the second byte, depending on the hamming distance meaning how many bits are different from the first one. we divide by $256^2$ because $|\Omega| = 256^2$.
+we use a unified probablity space $\Omega$ where $P(\omega)$ = 
+$$\frac{1}{|\Omega|}$$
+. multiplying by $256$ is because of all the possible values for the first byte, and the $\binom{8}{i}$ is how many options there are for the second byte, depending on the hamming distance meaning how many bits are different from the first one. we divide by $256^2$ because $|\Omega| = 256^2$.
 
 
 ```python
@@ -374,7 +379,9 @@ sum(i*comb(8, i) for i in range(9))/256
 
 however, for two random alphanumeric letter, as the ones we would find in a plaintext, their values range between 48-122 (ascii table), which is significantly smaller than 0-255. this means the expected value of their hamming distance is going to be smaller:
 
-<font size = 4.5> $b1,b2\in{AlphaNumerics} \implies 48 <= b1, b2 <= 122 \implies \mathbb{E}[HammingDist(b1,b2)] = \sum_{b1,b2\in{AlphaNumerics}}\mathbb{P}(b1,b2)\cdot HammingDist(b1,b2) = $ <br> $= \frac{1}{|\Omega|}\sum_{b1,b2\in{AlphaNumberics}}HammingDist(b1,b2) = 3.311  $ </font>
+$$
+b1,b2\in{AlphaNumerics} \implies 48 <= b1, b2 <= 122 \implies \mathbb{E}[HammingDist(b1,b2)] = \sum_{b1,b2\in{AlphaNumerics}}\mathbb{P}(b1,b2)\cdot HammingDist(b1,b2) = $$
+ $$= \frac{1}{|\Omega|}\sum_{b1,b2\in{AlphaNumberics}}HammingDist(b1,b2) = 3.311  $$ 
 
 and this is for the entire 48-122 range, while in reality there are barely any non-letters in plaintext therefore making the expected hamming value even smaller.
 
