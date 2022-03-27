@@ -8,10 +8,11 @@ tags:
     - CryptoPals Set 1 writeup
     - Cracking repeating key XOR
     - CryptoPals writeups
+toc: true
 ---
 
 
-#### the following are my solutions + explanations to the first set of the cryptopals challenges. In my opinion, the main goal of challenges 1-5 is to prepare the solver for challenge 6 - cracking repeating key XOR.
+the following are my solutions + explanations to the first set of the cryptopals challenges. In my opinion, the main goal of challenges 1-5 is to prepare the solver for challenge 6 - cracking repeating key XOR.
 
 ## challenge 1: Convert hex to base64
 

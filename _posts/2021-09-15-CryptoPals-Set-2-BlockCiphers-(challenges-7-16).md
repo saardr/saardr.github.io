@@ -8,11 +8,12 @@ tags:
     - CryptoPals Set 2 writeup
     - AES
     - CryptoPals writeups
+toc: true
 ---
 
-#### the following are my solutions + explanations to the second set of the cryptopals challenges, other set solutions can be found at my [github](https://github.com/saardr)
+ the following are my solutions + explanations to the second set of the cryptopals challenges, other set solutions can be found at my [github](https://github.com/saardr)
 
-##### the challenges will not be solved in their order, but rather in the order that makes the code most readable throughout.
+ the challenges will not be solved in their order, but rather in the order that makes the code most readable throughout.
 
 ## Challenge 9 + 15: Implement PKCS#7 padding and validation
 
