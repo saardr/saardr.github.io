@@ -260,7 +260,7 @@ Remember that the problem with ECB is that it is stateless and deterministic; th
 
 Solution: we use the fact the ECB generates the same cipher-block for the same plain-block, therefore an easy (and the only one i am aware of) for detecting it, is looking for 2 blocks with the same value:  
 we split every line into 16-bytes long blocks, and find the line for which two blocks are the same. this image pretty much says it all:  
-![alt text](../assets/images/ECB_encryption.png)
+![ECB_encryption.png](/assets/images/ECB_encryption.png)
 
 
 ```python
@@ -315,9 +315,9 @@ Do not use OpenSSL's CBC code to do CBC mode, even to verify your results. What'
 
 his is more of an understanding + implementation task, however i feel the challenge is really well explained with the following 2 pictures:
 
-![alt text](../assets/images/CBC_encryption.png)
+![CBC_encryption.png](/assets/images/CBC_encryption.png)
 
-![alt text](../assets/images/CBC_decryption.png)
+![CBC_decryption.png](/assets/images/CBC_decryption.png)
 
 
 ```python
