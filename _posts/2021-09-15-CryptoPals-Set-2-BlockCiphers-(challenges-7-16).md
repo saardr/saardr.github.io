@@ -10,7 +10,7 @@ tags:
     - CryptoPals writeups
 ---
 
-#### the following are my solutions + explanations to the second set of the cryptopals challenges, other set solutions can be found at my [github](https://github.com/lordofswords)
+#### the following are my solutions + explanations to the second set of the cryptopals challenges, other set solutions can be found at my [github](https://github.com/saardr)
 
 ##### the challenges will not be solved in their order, but rather in the order that makes the code most readable throughout.
 
