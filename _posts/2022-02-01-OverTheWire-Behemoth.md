@@ -28,7 +28,7 @@ In this challenge we are given a simple a Fairly simple binary.
 
 When we try running it we get:
 
-![Behemoth0-run-attempt](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth0-run-attempt.png)
+![Behemoth0-run-attempt](/assets/images/OtwBehemoth/Behemoth0-run-attempt.png)
 
 Let's try disassembling the binary to understand it better.
 
@@ -38,7 +38,7 @@ We can copy the binary to our local machine using [scp](https://linux.die.net/ma
 
 I'll be using both [IDA freeware](https://hex-rays.com/ida-free/) and [Ghidra](https://github.com/NationalSecurityAgency/ghidra/releases) (for the decompiler mostly, as there is not x86 decompile with IDA free) in these challenges, you can any other reversing tool of your choice, but I would strongly urge against using just gdb as challenges get more difficult to reverse.
 
-![Behemoth0-reversing-graph](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth0-reversing-graph.png)
+![Behemoth0-reversing-graph](/assets/images/OtwBehemoth/Behemoth0-reversing-graph.png)
 
 The program asks for a password, and it then reads 64 bytes from the user using scanf. Since it reads them into ebp-0x5d it seems a buffer overflow is out of the question this time.
 
@@ -61,17 +61,17 @@ __`eatmyshorts`__
 
 we enter the password and get a shell!
 
-![Behemoth0-win](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth0-win.png)
+![Behemoth0-win](/assets/images/OtwBehemoth/Behemoth0-win.png)
 
 ## Challenge 2 - Classic Ret2Buf BufferOverflow:
 
 again we ssh into the machine and run the binary, we get a similar result as in challenge 1. 
 
-![Behemoth1-run-attempt](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth1-run-attempt.png)
+![Behemoth1-run-attempt](/assets/images/OtwBehemoth/Behemoth1-run-attempt.png)
 
 Let us download the binary once more and disassemble it:
 
-![Behemoth1-reversing-graph](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth1-reversing-graph.png)
+![Behemoth1-reversing-graph](/assets/images/OtwBehemoth/Behemoth1-reversing-graph.png)
 
 Immediatly the call to gets() pops out. from man:
 
@@ -100,7 +100,7 @@ What is ASLR? for our purposes - "ASLR randomly arranges the address space posit
 
 Let us also run [checksec](https://github.com/slimm609/checksec.sh) (to install: `sudo apt install checksec`) which tells us more about the binary's protections: 
 
-![Behemoth1-checksec](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth1-checksec.png)
+![Behemoth1-checksec](/assets/images/OtwBehemoth/Behemoth1-checksec.png)
 
 Most importantly the binary does not have a [NX bit](https://en.wikipedia.org/wiki/NX_bit) set. tl;dr - if NX is set, then writable addresses in memory, in our case most importantly the process stack, can't run code - specifically shellcode. Since it is disabled, we can write and run shellcode on the stack which is exactly what we are going to do. also important, the binary does not have a [stack canary](https://en.wikipedia.org/wiki/Buffer_overflow_protection#Canaries). Combining this with the fact the system has no ASLR, makes for a pretty simple exploit plan:
 
@@ -114,13 +114,13 @@ To find out that address, lets load the program in gdb:
 
 `gdb behemoth1` followed by `set disassembly-flavor intel` to use intel syntax (like IDA) instead of GAS. `disassemble main`:
 
-![Behemoth1-gdb-disasMain](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth1-gdb-disasMain.png)
+![Behemoth1-gdb-disasMain](/assets/images/OtwBehemoth/Behemoth1-gdb-disasMain.png)
 
 we break at the call to gets by typing `break *0x08048456`, followed by running the program, we then check eax: info register eax or `i r eax` which results in 0xffffd625. just to make sure, lets type some letters, i.e. AAAABBBBCCCC and break at the return to check if we got it right:
 
 after doing so, examine string at 0xffffd625, i.e. `x/s 0xffffd625` (this time no astrick) and see if we get our string:
 
-![Behemoth1-gdb-output](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth1-gdb-output.png)
+![Behemoth1-gdb-output](/assets/images/OtwBehemoth/Behemoth1-gdb-output.png)
 
 Nice! now lets get to writing our shellcode:
 
@@ -164,7 +164,7 @@ we compile the shellcode with `nasm -f elf shellcode.asm` which gets us `shellco
 
 We can then extract the shellcode from the binary by calling `objdump -d shellcode` (the shellcode is inside the red rectangle):
 
-![Behemoth1-shellcodeHex](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth1-shellcodeHex.png)
+![Behemoth1-shellcodeHex](/assets/images/OtwBehemoth/Behemoth1-shellcodeHex.png)
 
 Copy the bytes into a python string (or whatever other language you want to use) be prepending \x before every byte in the string. i.e. the shellcode in python form is 
 
@@ -243,7 +243,7 @@ __Troubleshooting__ - even after doing all the steps, since we are dealing with 
 
 We run our exploit:
 
-![Behemoth1-win](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth1-win.png)
+![Behemoth1-win](/assets/images/OtwBehemoth/Behemoth1-win.png)
 
 We win! :)
 
@@ -251,11 +251,11 @@ We win! :)
 
 Once again, lets start by trying to simplty run the program. we get:
 
-![Behemoth2-run-attempt](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth2-run-attempt.png)
+![Behemoth2-run-attempt](/assets/images/OtwBehemoth/Behemoth2-run-attempt.png)
 
 This seems a bit weird, lets try to reverse the program and see where we end up, The main code is made of 3 chunks. the first:
 
-![Behemoth2-reversing1](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth2-reversing1.png)
+![Behemoth2-reversing1](/assets/images/OtwBehemoth/Behemoth2-reversing1.png)
 
 we see what looks like a pretty long prologue, followed by a call to `getpid()`.
 
@@ -273,13 +273,13 @@ make it so that `[ebp+var_10] -> but[6]` which is just where `str(pid)` starts.
 
 After reading about lstat for a bit, as well as using basic intuition, we can tell lstat is being used here to check if a file name {curr_pid} exists, if it does, eax will contain the value 0. else, eax will contain the value -1. nontheless, a & 0xF000 = 0 or 0xF000 != 0x8000 hence the jump won't occur and we go to the second block. 
 
-![Behemoth2-reversing2](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth2-reversing2.png)
+![Behemoth2-reversing2](/assets/images/OtwBehemoth/Behemoth2-reversing2.png)
 
 we then call unlink depending on the results of the previous call, followed by setting the real user id, from this point on, if we get code execution we win.
 
 We then make a call to `system("touch {curr_pid}")`. then the last block
 
-![Behemoth2-reversing3](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth2-reversing3.png)
+![Behemoth2-reversing3](/assets/images/OtwBehemoth/Behemoth2-reversing3.png)
 
 opens with a call to `sleep(2000)` which tells to program to sleep for 2000 seconds. This is probably a sign of one of two things:
 
@@ -301,7 +301,7 @@ we then `chmod 777 ./touch` which makes it executable by all users on the system
 
 Lastly we do `export PATH=$(pwd):$PATH` which prepends the current directory to $PATH __before__ /usr/bin (which is where touch is). 
 
-![Behemoth2-win](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth2-win.png)
+![Behemoth2-win](/assets/images/OtwBehemoth/Behemoth2-win.png)
 
 We win! :)
 
@@ -311,11 +311,11 @@ This was by far the hardest challenge in my opinion as far as exploitation goes.
 
 First, lets login and run the binary to see what happens:
 
-![Behemoth3-run-attempt](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth3-run-attempt.png)
+![Behemoth3-run-attempt](/assets/images/OtwBehemoth/Behemoth3-run-attempt.png)
 
 indeed we have a printf format exploit. Nontheless, lets reverse the binary:
 
-![Behemoth3-reversing](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth3-reversing.png)
+![Behemoth3-reversing](/assets/images/OtwBehemoth/Behemoth3-reversing.png)
 
 The program reads 0xC8 = 200 bytes from the user as input, and then prints the input using printf. (instead of puts! simply using puts() would make all problems go away). This is a classic printf format, however exploiting this with ASLR is a lot trickier than it seems.
 
@@ -340,11 +340,11 @@ That means there are 4 - (-0xC8) = 0xCC bytes between the first parameter (inclu
 
 To print the n'th argument to printf we can use %n$p: the n$ specifies it's the n'th argument while p is for pointer. in our case, %52$p. we plug it as input in gdb, and compare that to `[ebp+4]` which we know is the return address. Indeed it is the 52nd argument:
 
-![Behemoth3-gdb-verifying-52](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth3-gdb-verifying-52.png)
+![Behemoth3-gdb-verifying-52](/assets/images/OtwBehemoth/Behemoth3-gdb-verifying-52.png)
 
 __Important__: Also, it is important to follow execution into __libc_start_main as it can be uncertain to what point in libc_start_main the code returns:
 
-![Behemoth3-libc_start_main](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth3-libc_start_main.png)
+![Behemoth3-libc_start_main](/assets/images/OtwBehemoth/Behemoth3-libc_start_main.png)
 
 we see that the code returns to __libc_start_main+241 (on my local machine's libc, it is 246 on the server). so if we know the return address then:
 
@@ -354,11 +354,11 @@ Pwntools does handle that for us, and i will make use of that later on, but this
 
 So, now that we have the return address, we need to overwrite puts@.got.plt to return to main. We can easily find that address using IDA, by clicking on _puts in main:
 
-<img src="/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth3-IDA-plt.png" alt="Behemoth3-IDA-plt" style="zoom:50%;" />
+<img src="/assets/images/OtwBehemoth/Behemoth3-IDA-plt.png" alt="Behemoth3-IDA-plt" style="zoom:50%;" />
 
 and when we click on off_80497AC we indeed get into the .got.plt section:
 
-<img src="/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth3-IDA-got_plt.png" alt="Behemoth3-IDA-got_plt" style="zoom:50%;" />
+<img src="/assets/images/OtwBehemoth/Behemoth3-IDA-got_plt.png" alt="Behemoth3-IDA-got_plt" style="zoom:50%;" />
 
 So `0x080497AC` is the address we are going to overwrite, with `0x080847B`(main). In order to overwrite it with said value we are going to need to use %n, but since we can't write `0x080847B` bytes to screen, we instead are going to be overwriting the lower 2 bytes and upper 2 bytes of `puts@.got.plt` separately. To get enough padding for writing we can use %kx where k is a number, to prepend the hex number with spaces such that cnt(spaces) + Len(hex_num) = k. If we follow that with %n then we will write k + cnt(whatever came before %kx) to the target.
 
@@ -453,7 +453,7 @@ The entire exploit, including ground-work, using pwntools-ssh to interact with B
 
 This is a 0 click solution to challenge 4 WITH ASLR, just install python3 and pwntools on your local linux machine and you're set.
 
-![Behemoth3-win](/Users/saardrori/Library/Mobile Documents/com~apple~CloudDocs/Code/Projects/saardr.github.io/assets/images/OtwBehemoth/Behemoth3-win.gif)
+![Behemoth3-win](/assets/images/OtwBehemoth/Behemoth3-win.gif)
 
 ## Challenge 5:
 
